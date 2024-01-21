@@ -2,7 +2,7 @@
 export default function Avatar({size}) {
   let styles="overflow-hidden rounded-full w-12 h-12";
   if(size==='lg'){
-    styles="overflow-hidden rounded-full w-20 h-20"
+    styles="overflow-hidden rounded-full w-24 h-24"
   }
   return (
     <div className={styles}>
