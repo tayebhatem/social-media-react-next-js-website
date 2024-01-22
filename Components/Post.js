@@ -3,15 +3,16 @@ import Avatar from "./Avatar";
 import Card from "./Card";
 import React, { useState } from 'react';
 import ClickOutHandler from 'react-clickout-handler';
-export default function Post() {
+export default function Post({url,name,imgurl,context}) {
+  const profileImg="https://scontent.falg5-2.fna.fbcdn.net/v/t39.30808-6/325350524_700610724796391_8680551698288473632_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=efb6e6&_nc_eui2=AeFoYW-mF02dsaQgYaXqkaXSQ5b59qlqS-dDlvn2qWpL52kJaiwHkj-huMm7e2bMHVS-leXfaWdMs759jzsi0syi&_nc_ohc=TQ0ONJqC6XEAX-Syr5i&_nc_ht=scontent.falg5-2.fna&oh=00_AfDQPLohqIChCu319erYqWCvl2RFmHfg4B8a7W4TeRh16g&oe=65B28D0B";
     const[dropDawnOpen,setDropDawnOpen]=useState(false);
   return (
     <Card>
         <div className="flex items-start justify-between">
 
            <div className="flex gap-2">
-           <Link href={'/profile'}>
-           <Avatar/>
+           <Link href={'/profile/posts'}>
+           <Avatar url={url}/>
            </Link>
            
            
@@ -19,7 +20,7 @@ export default function Post() {
           <div>
           <p>
           <Link href={'/profile'}>
-          <span className="font-semibold mr-1">Tayeb Hatem</span>
+          <span className="font-semibold mr-1">{name}</span>
           </Link>
           
            shared a post</p>
@@ -74,9 +75,9 @@ export default function Post() {
         </div>
 
         <div>
-            <p className="py-3">Excepteur est est minim aute commodo fugiat eu ut anim tempor sunt labore aliqua. Exercitation proident elit sunt est nisi enim duis id consequat.</p>
+            <p className="py-3">{context}</p>
            <div className="">
-           <img src="https://img.freepik.com/photos-gratuite/beau-tir-tente-orange-montagne-rocheuse-entouree-arbres-au-coucher-du-soleil_181624-3908.jpg?w=740&t=st=1705845452~exp=1705846052~hmac=45b4c6d15119d59e274c84a61c5015f014d2df840119c9f16e7269a3d347e1ee"/>
+           <img src={imgurl}/>
            </div>
         </div>
         <div className="mt-4 flex gap-2">
@@ -101,7 +102,7 @@ export default function Post() {
             </button>
         </div>
         <div className="flex gap-2 mt-4 items-center">
-        <Avatar/>
+        <Avatar url={profileImg}/>
          <div className="grow p-3 flex gap-2 bg-gray-100 rounded-full">
          <input className="grow resize-none  outline-none bg-transparent"  placeholder="Leave a comment..." />
          <button className="text-gray-500">

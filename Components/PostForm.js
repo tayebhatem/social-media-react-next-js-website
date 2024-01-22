@@ -3,10 +3,11 @@ import Card from "./Card";
 
 
 export default function PostForm() {
+  const url="https://scontent.falg5-2.fna.fbcdn.net/v/t39.30808-6/325350524_700610724796391_8680551698288473632_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=efb6e6&_nc_eui2=AeFoYW-mF02dsaQgYaXqkaXSQ5b59qlqS-dDlvn2qWpL52kJaiwHkj-huMm7e2bMHVS-leXfaWdMs759jzsi0syi&_nc_ohc=TQ0ONJqC6XEAX-Syr5i&_nc_ht=scontent.falg5-2.fna&oh=00_AfDQPLohqIChCu319erYqWCvl2RFmHfg4B8a7W4TeRh16g&oe=65B28D0B";
   return (
     <Card> 
         <div className="flex gap-3">
-         <Avatar/>
+         <Avatar url={url}/>
        
             <input className="grow resize-none outline-none outline-1 p-3 bg-gray-50 rounded-full" placeholder="What's on your mind ?"/>
             
