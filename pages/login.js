@@ -1,0 +1,29 @@
+
+import { FcGoogle } from "react-icons/fc";
+import { FaFacebook,FaTwitter } from "react-icons/fa";
+
+export default function Login() {
+  return (
+   
+       <div className=" p-3  bg-white rounded-md shadow-md max-w-md mx-auto mt-52">
+       
+        <h1 className="font-bold text-3xl text-center mb-3">Login</h1>
+        <div className="flex flex-col gap-3">
+        <button className="flex  items-center justify-center gap-2 bg-gray-100 py-3 px-5 rounded-full grow text-lg hover:bg-gray-200">
+        <FcGoogle className="text-2xl"/>
+        Login with Google
+        </button>
+        <button className="flex  items-center justify-center gap-2 bg-gray-100 py-3 px-5 rounded-full grow text-lg hover:bg-gray-200">
+        <FaFacebook className="text-2xl text-blue-700"/>
+        Login with Facebook
+        </button>
+        <button className="flex  items-center justify-center gap-2 bg-gray-100 py-3 px-5 rounded-full grow text-lg hover:bg-gray-200">
+        <FaTwitter className="text-2xl text-blue-600"/>
+        Login with Twitter
+        </button>
+        </div>
+        
+       </div> 
+   
+  )
+}

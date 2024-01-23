@@ -2,7 +2,7 @@ import Link from "next/link";
 import Avatar from "./Avatar";
 import Card from "./Card";
 import React, { useState } from 'react';
-import ClickOutHandler from 'react-clickout-handler';
+
 export default function Post({url,name,imgurl,context}) {
   const profileImg="https://scontent.falg5-2.fna.fbcdn.net/v/t39.30808-6/325350524_700610724796391_8680551698288473632_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=efb6e6&_nc_eui2=AeFoYW-mF02dsaQgYaXqkaXSQ5b59qlqS-dDlvn2qWpL52kJaiwHkj-huMm7e2bMHVS-leXfaWdMs759jzsi0syi&_nc_ohc=TQ0ONJqC6XEAX-Syr5i&_nc_ht=scontent.falg5-2.fna&oh=00_AfDQPLohqIChCu319erYqWCvl2RFmHfg4B8a7W4TeRh16g&oe=65B28D0B";
     const[dropDawnOpen,setDropDawnOpen]=useState(false);
@@ -34,11 +34,11 @@ export default function Post({url,name,imgurl,context}) {
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
         </svg>
         </button>
-        <ClickOutHandler onClickOut={()=>{setDropDawnOpen(false)}}>
+        
          <>
             {
                 dropDawnOpen &&  
-                <div className="flex flex-col gap-3 w-52 absolute right-0 bg-white shadow-md shadow-gray-300 rounded-md p-3 border">
+                <div className="flex flex-col gap-3 w-52 absolute right-0 z-10 bg-white shadow-md shadow-gray-300 rounded-md p-3 border">
                  <a href="" className="flex gap-2  hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all py-2">
                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
@@ -70,7 +70,7 @@ export default function Post({url,name,imgurl,context}) {
                 </div>
             }
          </>
-      </ClickOutHandler>
+     
          </div>
         </div>
 
@@ -80,7 +80,7 @@ export default function Post({url,name,imgurl,context}) {
            <img src={imgurl}/>
            </div>
         </div>
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex gap-2 border-b pb-3">
             <button className="flex gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
@@ -110,7 +110,12 @@ export default function Post({url,name,imgurl,context}) {
         <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
         </svg>
          </button>
-        
+         <button className="text-gray-500">
+         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+  <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+</svg>
+
+         </button>
 
          </div>  
         </div>
