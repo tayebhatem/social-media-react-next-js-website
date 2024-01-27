@@ -1,5 +1,5 @@
 import Card from "@/Components/Card";
-import Profile from "../profile";
+import Profile from "@/Components/Profile";
 
 export default function Photos() {
   return (

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Avatar from "./Avatar";
+import { useContext } from "react";
+import { UserContext } from "@/Context/UserContext";
 
 
 export default function Header({setShowNavigation,showNavigation}) {
@@ -8,7 +10,7 @@ export default function Header({setShowNavigation,showNavigation}) {
       setShowNavigation(!showNavigation);
       }
 
-    const url="https://scontent.falg5-2.fna.fbcdn.net/v/t39.30808-6/325350524_700610724796391_8680551698288473632_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=efb6e6&_nc_eui2=AeFoYW-mF02dsaQgYaXqkaXSQ5b59qlqS-dDlvn2qWpL52kJaiwHkj-huMm7e2bMHVS-leXfaWdMs759jzsi0syi&_nc_ohc=TQ0ONJqC6XEAX-Syr5i&_nc_ht=scontent.falg5-2.fna&oh=00_AfDQPLohqIChCu319erYqWCvl2RFmHfg4B8a7W4TeRh16g&oe=65B28D0B";
+   const {user}=useContext(UserContext);
   return (
     <div className=" bg-white  py-3 px- border-t-2 shadow-sm fixed w-full top-0 z-10 md:z-40">
    <div className="px-3 lg:px-0 flex justify-between items-center max-w-4xl mx-auto">
@@ -34,7 +36,7 @@ export default function Header({setShowNavigation,showNavigation}) {
 </svg>
 </span>
     <Link href={'/profile/posts'}>
-    <Avatar url={url}/>
+   {user && <Avatar url={user.avatar}/>}
     </Link>
   </div>
    </div>

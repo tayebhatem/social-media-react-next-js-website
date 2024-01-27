@@ -1,18 +1,144 @@
 import Link from "next/link";
 import Avatar from "./Avatar";
 import Card from "./Card";
-import React, { useState } from 'react';
-
-export default function Post({url,name,imgurl,context}) {
-  const profileImg="https://scontent.falg5-2.fna.fbcdn.net/v/t39.30808-6/325350524_700610724796391_8680551698288473632_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=efb6e6&_nc_eui2=AeFoYW-mF02dsaQgYaXqkaXSQ5b59qlqS-dDlvn2qWpL52kJaiwHkj-huMm7e2bMHVS-leXfaWdMs759jzsi0syi&_nc_ohc=TQ0ONJqC6XEAX-Syr5i&_nc_ht=scontent.falg5-2.fna&oh=00_AfDQPLohqIChCu319erYqWCvl2RFmHfg4B8a7W4TeRh16g&oe=65B28D0B";
+import React, { useState,useContext, useRef,useEffect } from 'react';
+import ReactTimeAgo from "react-time-ago";
+import { UserContext } from "@/Context/UserContext";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+export default function Post({context,date,photos,profiles,id}) {
+ 
     const[dropDawnOpen,setDropDawnOpen]=useState(false);
+    const [emptyComment,setEmptyComment]=useState(true);
+    const {user}=useContext(UserContext);
+    const[comments,setComments]=useState([]);
+    const[likes,setLikes]=useState(0);
+    const[isLiked,setIsLiked]=useState(false);
+    const supabase=useSupabaseClient();
+    const comment=useRef('');
+    const fetchComments=async()=>{
+      try {
+       await supabase.from('comment').select('*,profiles!inner(*)').eq('postId',id).order("created_at").then(
+         result=>{
+
+          
+           setComments(result.data);
+         }
+       );
+      } catch (error) {
+       console.log(error.message);
+       
+      }
+   
+       }
+       const fetchLikes=async()=>{
+        try {
+         await supabase.from('likes').select('*').eq('postId',id).then(
+           result=>{
+            if(result.data.length>0){
+             setIsLiked(true);
+            }
+             
+            setLikes(result.data.length);
+             
+            
+           }
+         );
+        } catch (error) {
+         console.log(error.message);
+         
+        }
+     
+         }
+  
+         const checkLike=async()=>{
+          try {
+           await supabase.from('likes').select('*').eq('userId',user.id).eq('postId',id).then(
+             result=>{
+             if(result.data.length>0){
+              setIsLiked(true);
+               
+             }
+             
+               
+              
+             }
+           );
+          } catch (error) {
+           console.log(error.message);
+           
+          }
+         
+           }
+    const addComment=async()=>{
+      const commentContext=comment.current.value;
+    
+      
+        await supabase.
+         from('comment').insert({context:commentContext,userId:user.id,postId:id}).then(
+           result=>{
+             if (!result.error) {
+              fetchComments();
+              comment.current.value = '';
+             
+             }else{
+               console.log(result.error);
+             }
+           }
+         );
+        
+      
+    }
+
+    const addLike=async()=>{
+     
+       
+      
+     if(!isLiked){
+      try {
+        await supabase.
+        from('likes').insert({userId:user.id,postId:id}).then(
+          result=>{
+            if (!result.error) {
+            fetchLikes();
+          
+            
+            }else{
+              console.log(result.error);
+            }
+          }
+        );
+       } catch (error) {
+        
+       }
+     }
+
+    }
+    useEffect(()=>{
+      checkLike();
+      fetchComments();
+
+    },[])
+    useEffect(()=>{
+      fetchLikes();
+     
+
+    },[])
+    const inputHandler=(e)=>{
+      const text=e.target.value;
+      if(text==''){
+        setEmptyComment(true);
+      }else{
+        setEmptyComment(false);
+      }
+      }
+      
   return (
     <Card>
         <div className="flex items-start justify-between">
 
            <div className="flex gap-2">
            <Link href={'/profile/posts'}>
-           <Avatar url={url}/>
+           <Avatar url={profiles.avatar}/>
            </Link>
            
            
@@ -20,11 +146,13 @@ export default function Post({url,name,imgurl,context}) {
           <div>
           <p>
           <Link href={'/profile'}>
-          <span className="font-semibold mr-1">{name}</span>
+          <span className="font-semibold mr-1">{profiles.name}</span>
           </Link>
           
            shared a post</p>
-            <p className="text-gray-500 text-sm">2 hours ago</p>
+            <p className="text-gray-500 text-sm">
+            <ReactTimeAgo date={date} locale="en-US"/>
+            </p>
           </div>
            </div>
 
@@ -76,41 +204,71 @@ export default function Post({url,name,imgurl,context}) {
 
         <div>
             <p className="py-3">{context}</p>
-           <div className="">
-           <img src={imgurl}/>
+          <div className="flex gap-3">
+          {
+            photos.map(url=>(
+              <>
+              <div className="flex items-center rounded-md  overflow-hidden">
+           <img src={url}/>
            </div>
+              </>
+            ))
+          }
+          </div>
         </div>
+
         <div className="mt-4 flex gap-2 border-b pb-3">
-            <button className="flex gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <button className="flex gap-2 text" onClick={addLike} >
+            <svg xmlns="http://www.w3.org/2000/svg" fill={isLiked?"red":"none"} viewBox="0 0 24 24" strokeWidth={isLiked?0:1.5} stroke="currentColor" className="w-7 h-7">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
             </svg>
-                33
+            {likes}
             </button>
             <button className="flex gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
             </svg>
-              13
+              0
             </button>
 
             <button className="flex gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
             <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
             </svg>
-            6
+            0
             </button>
         </div>
+        <div className="flex flex-col gap-3 py-3">
+        {
+          comments.map(comment=>(
+            <>
+             <div className="flex flex-col gap-3">
+            <div className="flex gap-2 items-center">
+            <Avatar url={comment.profiles.avatar}/>
+           <div className=" bg-gray-200 rounded-3xl py-2 px-4">
+           <div className="flex gap-2">
+           <div className="text-md font-bold">{comment.profiles.name}</div>
+           <div className="text-gray-500">{ <ReactTimeAgo timeStyle={'twitter'} date={comment.created_at} locale="en-US"/>}</div>
+           </div>
+             <div>{comment.context}</div>
+           </div>
+            </div>
+            
+             </div>
+            </>
+          ))
+        }
+        </div>
         <div className="flex gap-2 mt-4 items-center">
-        <Avatar url={profileImg}/>
+        <Avatar url={user && user.avatar} size={'sm'}/>
          <div className="grow p-3 flex gap-2 bg-gray-100 rounded-full">
-         <input className="grow resize-none  outline-none bg-transparent"  placeholder="Leave a comment..." />
-         <button className="text-gray-500">
+         <input className="grow resize-none  outline-none bg-transparent" ref={comment}  placeholder="Leave a comment..." onChange={inputHandler} />
+         <button className="text-gray-500" >
          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
         <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
         </svg>
          </button>
-         <button className="text-gray-500">
+         <button className={emptyComment?"text-gray-500 ":"text-primary"} disabled={emptyComment && "true"} onClick={addComment}>
          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
   <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
 </svg>

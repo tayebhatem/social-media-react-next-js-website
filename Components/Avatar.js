@@ -5,7 +5,9 @@ export default function Avatar({size,url}) {
     styles="overflow-hidden cursor-pointer rounded-full w-24 h-24"
   }else if (size=='md') {
     styles="overflow-hidden cursor-pointer rounded-full w-16 h-16"
-  }
+  }else if (size=='sm') {
+    styles="overflow-hidden cursor-pointer rounded-full w-10 h-10"
+  } 
   return (
     <div className={styles}>
         <img  src={url}/>

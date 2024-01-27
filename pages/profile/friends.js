@@ -1,5 +1,5 @@
 import Card from "@/Components/Card";
-import Profile from "../profile";
+import Profile from "@/Components/Profile";
 import Friend from "@/Components/Friend";
 
 
