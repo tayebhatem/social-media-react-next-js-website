@@ -11,9 +11,16 @@ module.exports = {
     extend: {
       colors:{
         primary:"#2180FA",
-        bgColor:"#F5F7FB"
+        bgColor:"#F5F7FB",
+        darkcolorCard:"#282828",
+        darkcolorNav:"#575757",
+        darkcolorComment:"#3f3f3f",
+        darkcolorText:"#8b8b8b",
+        darkcolorInput:"#3f3f3f"
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwind-scrollbar'),
+  ],
 };

@@ -36,7 +36,7 @@ export default function Posts() {
           {
             myPosts.map(post=>(
               <>
-              <Post key={post.postId} id={post.postId} profiles={post.profiles} context={post.context} photos={post.photos} date={post.created_at}/>
+              <Post key={post.postId} post={post}/>
               </>
             ))
 

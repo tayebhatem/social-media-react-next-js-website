@@ -39,12 +39,12 @@ export default function Home() {
   return (
 
 <Layout>
-
+     
      <PostForm loadPosts={fetchPosts} />
     {
-      posts.map(post=>(
+      posts && posts.map(post=>(
        <>
-       <Post key={post.postId} id={post.postId} context={post.context} photos={post.photos} profiles={post.profiles} date={post.created_at}/>
+       <Post key={post.postId} post={post} loadPosts={fetchPosts}/>
   
        </>
       ))

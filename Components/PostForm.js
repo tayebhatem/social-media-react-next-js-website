@@ -80,7 +80,7 @@ export default function PostForm({loadPosts}) {
         <div className="flex gap-3">
          <Avatar url={user && user.avatar}/>
        
-            <input className="grow resize-none outline-none outline-1 p-3 bg-gray-50 rounded-full" placeholder="What's on your mind?" ref={context}/>
+            <input className="grow resize-none outline-none outline-1 p-3 bg-gray-50 rounded-full dark:bg-darkcolorInput" placeholder="What's on your mind?" ref={context}/>
             
         </div>
        {
@@ -102,7 +102,7 @@ export default function PostForm({loadPosts}) {
           }
         </div>
        }
-        <div className="flex  items-center justify-between mt-4 border-t pt-3">
+        <div className="flex  items-center justify-between mt-4 border-t pt-3 dark:border-t-darkcolorInput dark:text-darkcolorText">
 
            <div className="flex gap-3 items-center">
            <button  className="flex gap-2">

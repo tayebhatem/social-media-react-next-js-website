@@ -7,6 +7,10 @@
   padding: 0;
   box-sizing: border-box;
 }
+.dark-mode{
+  background-color: #121212;
+  color: #fff;
+}
 body{
   color: #333;
   @apply bg-bgColor

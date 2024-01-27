@@ -5,19 +5,23 @@ import React, { useState,useContext, useRef,useEffect } from 'react';
 import ReactTimeAgo from "react-time-ago";
 import { UserContext } from "@/Context/UserContext";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
-export default function Post({context,date,photos,profiles,id}) {
+import Comment from "./Comment";
+
+export default function Post({post,loadPosts}) {
  
     const[dropDawnOpen,setDropDawnOpen]=useState(false);
     const [emptyComment,setEmptyComment]=useState(true);
     const {user}=useContext(UserContext);
+    const session=useSession()
     const[comments,setComments]=useState([]);
-    const[likes,setLikes]=useState(0);
-    const[isLiked,setIsLiked]=useState(false);
+    const[likes,setLikes]=useState([]);
+  
     const supabase=useSupabaseClient();
     const comment=useRef('');
+   
     const fetchComments=async()=>{
       try {
-       await supabase.from('comment').select('*,profiles!inner(*)').eq('postId',id).order("created_at").then(
+       await supabase.from('comment').select('*,profiles!inner(*)').eq('postId',post.postId).order("created_at").then(
          result=>{
 
           
@@ -32,49 +36,46 @@ export default function Post({context,date,photos,profiles,id}) {
        }
        const fetchLikes=async()=>{
         try {
-         await supabase.from('likes').select('*').eq('postId',id).then(
+         await supabase.from('likes').select('*').eq('postId',post.postId).then(
            result=>{
-            if(result.data.length>0){
-             setIsLiked(true);
-            }
-             
-            setLikes(result.data.length);
-             
+           
+           
+            setLikes(result.data);
             
+         
            }
          );
         } catch (error) {
          console.log(error.message);
          
         }
-     
+      
+      
          }
   
-         const checkLike=async()=>{
-          try {
-           await supabase.from('likes').select('*').eq('userId',user.id).eq('postId',id).then(
-             result=>{
-             if(result.data.length>0){
-              setIsLiked(true);
-               
-             }
-             
-               
-              
-             }
-           );
-          } catch (error) {
-           console.log(error.message);
-           
-          }
+    const deletePsot=async()=>{
+      try{
+      supabase.
+      from('post').delete().eq('postId',post.postId).then(
+        result=>{
+          if (!result.error) {
+            loadPosts()
          
-           }
+          }else{
+            console.log(result.error);
+          }
+        }
+      );
+     } catch (error) {
+      
+     }
+    }
     const addComment=async()=>{
       const commentContext=comment.current.value;
     
       
         await supabase.
-         from('comment').insert({context:commentContext,userId:user.id,postId:id}).then(
+         from('comment').insert({context:commentContext,userId:user.id,postId:post.postId}).then(
            result=>{
              if (!result.error) {
               fetchComments();
@@ -88,20 +89,16 @@ export default function Post({context,date,photos,profiles,id}) {
         
       
     }
-
-    const addLike=async()=>{
-     
-       
-      
+    const isLiked=!!likes.find(like=>like.userId===user.id);
+    const addLike= ()=>{
      if(!isLiked){
       try {
-        await supabase.
-        from('likes').insert({userId:user.id,postId:id}).then(
+         supabase.
+        from('likes').insert({userId:user.id,postId:post.postId}).then(
           result=>{
             if (!result.error) {
             fetchLikes();
-          
-            
+           
             }else{
               console.log(result.error);
             }
@@ -110,19 +107,33 @@ export default function Post({context,date,photos,profiles,id}) {
        } catch (error) {
         
        }
+     }else{
+      try {
+        supabase.
+       from('likes').delete().eq('postId',post.postId).eq('userId',user.id).then(
+         result=>{
+           if (!result.error) {
+           fetchLikes();
+          
+           }else{
+             console.log(result.error);
+           }
+         }
+       );
+      } catch (error) {
+       
+      }
      }
 
     }
     useEffect(()=>{
-      checkLike();
-      fetchComments();
-
-    },[])
-    useEffect(()=>{
       fetchLikes();
      
-
+      fetchComments();
+      
+      
     },[])
+   
     const inputHandler=(e)=>{
       const text=e.target.value;
       if(text==''){
@@ -138,7 +149,7 @@ export default function Post({context,date,photos,profiles,id}) {
 
            <div className="flex gap-2">
            <Link href={'/profile/posts'}>
-           <Avatar url={profiles.avatar}/>
+           <Avatar url={post.profiles.avatar}/>
            </Link>
            
            
@@ -146,12 +157,13 @@ export default function Post({context,date,photos,profiles,id}) {
           <div>
           <p>
           <Link href={'/profile'}>
-          <span className="font-semibold mr-1">{profiles.name}</span>
+          <span className="font-semibold mr-1">{post.profiles.name}</span>
           </Link>
           
-           shared a post</p>
-            <p className="text-gray-500 text-sm">
-            <ReactTimeAgo date={date} locale="en-US"/>
+          <a className="dark:text-darkcolorText"> shared a post</a>
+           </p>
+            <p className="text-gray-500 text-sm dark:text-darkcolorText">
+            <ReactTimeAgo date={post.created_at} locale="en-US"/>
             </p>
           </div>
            </div>
@@ -166,35 +178,33 @@ export default function Post({context,date,photos,profiles,id}) {
          <>
             {
                 dropDawnOpen &&  
-                <div className="flex flex-col gap-3 w-52 absolute right-0 z-10 bg-white shadow-md shadow-gray-300 rounded-md p-3 border">
+                <div className="flex flex-col gap-3 w-52 absolute right-0 z-10 bg-white shadow-md shadow-gray-300 rounded-md p-3 border dark:bg-darkcolorNav dark:shadow-none dark:border-none">
                  <a href="" className="flex gap-2  hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all py-2">
                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
                  </svg>
                  Save post</a>
-                 <a href="" className="flex gap-2  hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all py-2">
-                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
-                </svg>
-                 Turn notifications
-                 </a>
+                
                  <a href="" className="flex gap-2  hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all py-2">
                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                  </svg>
                  Hide post</a>
-                 <a href="" className="flex gap-2  hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all py-2">
+                 {
+                  post.userId===user.id?<button className="flex gap-2  hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all py-2" onClick={deletePsot}>
                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                  </svg>
                  Delete post
-                 </a>
+                 </button>:
                  <a href="" className="flex gap-2  hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all py-2">
                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                  </svg>
 
                  Report post</a>
+                 }
+                
                 </div>
             }
          </>
@@ -203,10 +213,10 @@ export default function Post({context,date,photos,profiles,id}) {
         </div>
 
         <div>
-            <p className="py-3">{context}</p>
+            <p className="py-3">{post.context}</p>
           <div className="flex gap-3">
           {
-            photos.map(url=>(
+            post.photos.map(url=>(
               <>
               <div className="flex items-center rounded-md  overflow-hidden">
            <img src={url}/>
@@ -217,18 +227,18 @@ export default function Post({context,date,photos,profiles,id}) {
           </div>
         </div>
 
-        <div className="mt-4 flex gap-2 border-b pb-3">
-            <button className="flex gap-2 text" onClick={addLike} >
+        <div className="mt-4 flex gap-2 border-b pb-3 dark:border-b-darkcolorInput">
+            <button className="flex gap-2" onClick={addLike} >
             <svg xmlns="http://www.w3.org/2000/svg" fill={isLiked?"red":"none"} viewBox="0 0 24 24" strokeWidth={isLiked?0:1.5} stroke="currentColor" className="w-7 h-7">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
             </svg>
-            {likes}
+            {likes.length}
             </button>
             <button className="flex gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
             </svg>
-              0
+             {comments.length}
             </button>
 
             <button className="flex gap-2">
@@ -238,37 +248,26 @@ export default function Post({context,date,photos,profiles,id}) {
             0
             </button>
         </div>
-        <div className="flex flex-col gap-3 py-3">
+        <div className="flex flex-col gap-3 py-3 max-h-40 overflow-auto scrollbar scrollbar-thumb-gray-300 dark:scrollbar-thumb-darkcolorComment">
         {
           comments.map(comment=>(
-            <>
-             <div className="flex flex-col gap-3">
-            <div className="flex gap-2 items-center">
-            <Avatar url={comment.profiles.avatar}/>
-           <div className=" bg-gray-200 rounded-3xl py-2 px-4">
-           <div className="flex gap-2">
-           <div className="text-md font-bold">{comment.profiles.name}</div>
-           <div className="text-gray-500">{ <ReactTimeAgo timeStyle={'twitter'} date={comment.created_at} locale="en-US"/>}</div>
-           </div>
-             <div>{comment.context}</div>
-           </div>
-            </div>
-            
-             </div>
-            </>
+           <>
+           
+           <Comment key={comment.commentId} comment={comment}/>
+           </>
           ))
         }
         </div>
         <div className="flex gap-2 mt-4 items-center">
         <Avatar url={user && user.avatar} size={'sm'}/>
-         <div className="grow p-3 flex gap-2 bg-gray-100 rounded-full">
+         <div className="grow p-3 flex gap-2 bg-gray-100 rounded-full dark:bg-darkcolorInput">
          <input className="grow resize-none  outline-none bg-transparent" ref={comment}  placeholder="Leave a comment..." onChange={inputHandler} />
          <button className="text-gray-500" >
          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
         <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
         </svg>
          </button>
-         <button className={emptyComment?"text-gray-500 ":"text-primary"} disabled={emptyComment && "true"} onClick={addComment}>
+         <button className={emptyComment?"text-gray-500 ":"text-primary dark:text-white"} disabled={emptyComment && "true"} onClick={addComment}>
          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
   <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
 </svg>

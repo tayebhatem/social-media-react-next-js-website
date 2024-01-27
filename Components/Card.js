@@ -1,6 +1,6 @@
 export default function Card({ children,noPadding,fullHight }) {
 
-  let styles="bg-white shadow-md rounded-md mb-5 max-w-2xl";
+  let styles="bg-white shadow-md rounded-md mb-5 max-w-2xl dark:bg-darkcolorCard";
  if(!noPadding){
    styles+=" p-4";
  }
