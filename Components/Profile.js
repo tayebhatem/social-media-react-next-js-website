@@ -6,60 +6,197 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { CiCamera } from "react-icons/ci";
+import { v4 as uuidv4 } from 'uuid';
 export default function Profile({children}) {
  
   const router=useRouter();
+  const { id } = router.query;
   const {pathname}=router;
+  
   const activeElement="flex gap-2 border-b-4 pb-3 border-primary text-primary";
   const nonActiveElement="flex gap-2 dark:text-darkcolorText";
- const isPosts=pathname.includes('/profile/posts');
- const isFriends=pathname.includes('/profile/friends');
- const isPhotos=pathname.includes('/profile/photos');
- const isAbout=pathname.includes('/profile/about');
+ const isPosts=pathname.includes('/profile/[id]/posts');
+ const isFriends=pathname.includes('/profile/[id]/friends');
+ const isPhotos=pathname.includes('/profile/[id]/photos');
+ const isAbout=pathname.includes('/profile/[id]/about');
+
  const supabase=useSupabaseClient();
  const [user,setUser]=useState({});
+ const [url,setUrl]=useState(null);
+ const [isLoading,setIsLoading]=useState(false);
  const session=useSession();
 
-useEffect(()=>{
- const fetchUser=async()=>{
-   try {
-    const userId=session.user.id;
-   await supabase.from('profiles').select('*').eq('id',userId).single().then(
+ const getUrl=(fileName,path)=>{
+  const { data, error } =  supabase
+          .storage
+          .from('images')
+          .getPublicUrl(path+fileName) ;
+          if (error) {
+            console.error('Error fetching image URL:', error.message);
+           
+          }else{
+            if(path==='profiles/'){
+              updateProfilePicture(data.publicUrl);
+            }else{
+              updateCover(data.publicUrl);
+            }
+            
+            
+          
+          
+          }
+ }
+
+ const uplaodPhoto=(e)=>{
+ setIsLoading(true);
+  const file=e.target.files[0];
+  const uuid = uuidv4();
+  const fileName = uuid + '.' + file.name.split('.').pop();
+  supabase.storage.from('images')
+  .upload('profiles/'+fileName,file).then(
     result=>{
-     
-      
-      setUser(result.data);
-   
+      if(!result.error){
+        getUrl(fileName,'profiles/');
+        
+        setIsLoading(false);
+      }else{
+        console.log(error);
+      }
     }
-   );
+  );
     
-   } catch (error) {
-    console.log(error.message)
-   }
-    }
+  
+}
+
+const uplaodCover=(e)=>{
+//  setIsLoading(true);
+   const file=e.target.files[0];
+   const uuid = uuidv4();
+   const fileName = uuid + '.' + file.name.split('.').pop();
+   supabase.storage.from('images')
+   .upload('covers/'+fileName,file).then(
+     result=>{
+       if(!result.error){
+         getUrl(fileName,'covers/');
+     
+        // setIsLoading(false);
+       }else{
+         console.log(error);
+       }
+     }
+   );
+     
    
+ }
+
+const updateProfilePicture=async(url)=>{
+  try{
+   await supabase.
+    from('profiles').update({avatar:url}).eq('id',id).then(
+      result=>{
+        if (!result.error) {
+         
+         fetchUser();
+        }else{
+          console.log(result.error);
+        }
+      }
+    );
+   } catch (error) {
+    
+   }
+}
+
+const updateCover=async(url)=>{
+  try{
+    await supabase.
+    from('profiles').update({cover:url}).eq('id',id).then(
+      result=>{
+        if (!result.error) {
+         
+         fetchUser();
+        }else{
+          console.log(result.error);
+        }
+      }
+    );
+   } catch (error) {
+    
+   }
+}
+
+const fetchUser=async()=>{
+
+  try {
+   if (session.user.id===id) {
+    await supabase.from('profiles').select('*').eq('id',session.user.id).single().then(
+      result=>{
+        setUser(result.data);
+      }
+     );
+   } else {
+    await supabase.from('profiles').select('*').eq('id',id).single().then(
+      result=>{
+        setUser(result.data);
+      }
+     );
+   }
+ 
+   
+  } catch (error) {
+   console.log(error.message)
+  }
+   }
+
+useEffect(()=>{
   fetchUser();
   
-})
+},[user])
   return (
-    <UserContext.Provider value={{user}}>
+    
     <Layout>
     
         <Card noPadding={true}>
         <div className=" pb-10 h-80">
-       <div className="relative">
-       <div className="h-48 overflow-hidden flex justify-center items-center">
-                <img  src="https://img.freepik.com/photos-gratuite/new-york-city_649448-1679.jpg?w=740&t=st=1705866503~exp=1705867103~hmac=042dc4197d845864581665e650901b6ff7ce00829c537a5e8c372c60f712de30"/>
-            </div>
+       <div className="relative bg-gray-200 h-48 dark:bg-darkcolorNav">
+       {
+        session.user.id===id && <label className="cursor-pointer">
+       <div className="absolute right-3 top-2 flex items-center gap-2 px-2 bg-white p-1 rounded-md shadow-lg cursor-pointer dark:bg-darkcolorCard">
+       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+       <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+       </svg>
+       Change cover image
+       </div>
+       <input type="file" className="hidden" multiple onChange={uplaodCover}/>
+       </label>
+       }
+
+       {user.cover?<div className="h-48 overflow-hidden flex justify-center items-center ">
+                <img  src={user.cover}/>
+            </div>:
+            <div className="absolute top-2/4 left-2/4 -translate-x-1/2 -translate-y-2/4 text-6xl">
+       <CiCamera/>
+       </div>}
             <div className="absolute left-1/2 -bottom-1/3 flex flex-col justify-center items-center -translate-x-1/2 ">
                <div className="relative border-2 border-white w-fit rounded-full bg-white  dark:bg-darkcolorInput  dark:border-darkcolorInput">
-              {user && (<Avatar size={'lg'} url={user.avatar}/>)}
-               <div className="absolute bottom-0 right-1 bg-white rounded-full p-1 shadow-md dark:bg-darkcolorInput">
-               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <label className="cursor-pointer">
+              {user && <div className={isLoading && "animate-pulse"}><Avatar size={'lg'} url={user.avatar}/></div>}
+             {
+              session.user.id===id && <>
+              <input type="file" className="hidden" multiple onChange={uplaodPhoto}/>
+              <div className="absolute bottom-0 right-1 bg-white rounded-full p-1 shadow-md dark:bg-darkcolorInput">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
   <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
 </svg>
                </div>
+              </>
+             }
+              </label>
+              
+               
 
                </div>
             <div className="font-bold text-xl">
@@ -70,7 +207,7 @@ useEffect(()=>{
        </div>
        <div className="flex gap-4 mt-20 py-2 border-t text-gray-500 justify-center dark:border-t-darkcolorInput">
        
-       <Link href={'/profile/posts'}>
+       <Link href={'/profile/'+id+'/posts'}>
        <button className={isPosts? activeElement:nonActiveElement}>
        
        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -79,7 +216,7 @@ useEffect(()=>{
       Posts
              </button>
        </Link>
-       <Link href={'/profile/friends'}>
+       <Link href={'/profile/'+id+'/friends'}>
        <button className={isFriends? activeElement:nonActiveElement}>
        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
   <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
@@ -88,7 +225,7 @@ useEffect(()=>{
 Friends
        </button>
        </Link>
-      <Link href={'/profile/photos'}>
+      <Link href={'/profile/'+id+'/photos'}>
       <button className={isPhotos? activeElement:nonActiveElement}>
        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
   <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
@@ -98,7 +235,7 @@ Photos
        </button>
       </Link>
 
-      <Link href={'/profile/about'}>
+      <Link href={'/profile/'+id+'/about'}>
       <button className={isAbout? activeElement:nonActiveElement}>
        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
   <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
@@ -109,9 +246,10 @@ About
        </div>
         </div>
         </Card>
+        <UserContext.Provider value={{user}}>
         {children}
-       
+        </UserContext.Provider>
     </Layout>
-    </UserContext.Provider>
+    
   )
 }

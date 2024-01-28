@@ -12,8 +12,13 @@ export default function PostForm({loadPosts}) {
   const context=useRef('');
   const [urls,setUrls]=useState([]);
   const [isLoading,setIsLoading]=useState(false);
-  const getUrl=async(fileName)=>{
-    const { data, error } = await supabase
+  
+  const remove = (index) => {
+    const updatedUrls = [...urls.slice(0, index), ...urls.slice(index + 1)];
+    setUrls(updatedUrls);
+  };
+  const getUrl=(fileName)=>{
+    const { data, error } =  supabase
             .storage
             .from('images')
             .getPublicUrl('posts/'+fileName) ;
@@ -88,12 +93,17 @@ export default function PostForm({loadPosts}) {
   <div class="w-12 h-12 border-8 text-blue-400 text-4xl animate-spin border-gray-300 flex items-center justify-center border-t-blue-400 rounded-full">
    
   </div>
-</div>: <div className="flex gap-3  py-3">
+</div>: <div className={urls.length>1?"grid grid-cols-2 gap-3 py-3":"flex gap-3 py-3"}>
           {
            
              urls.map((url,index)=>(
               <>
-              <div className="flex items-center rounded-md  h-22 overflow-hidden">
+              <div className={urls.length>1?"relative flex items-center justify-center rounded-md h-48 overflow-hidden":"relative flex items-center justify-center rounded-md h-full overflow-hidden"} onClick={()=>{remove(index)}}>
+              <div className="absolute text-white  top-2 right-2 text cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+              </div>
               <img key={index} src={url}/>
               </div>
               </>

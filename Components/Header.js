@@ -3,9 +3,10 @@ import Avatar from "./Avatar";
 import { useContext, useState } from "react";
 import { UserContext } from "@/Context/UserContext";
 import { LuSun,LuMoon } from "react-icons/lu";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export default function Header({setShowNavigation,showNavigation}) {
-
+  const session=useSession();
    const toggleDarkMode=()=>{
     setDarkMode(!darkmode);
     const htmlElement = document.querySelector('html');
@@ -22,7 +23,7 @@ document.querySelector('body').classList.toggle('dark-mode');
    const {user}=useContext(UserContext);
    const [darkmode,setDarkMode]=useState(false);
   return (
-    <div className=" bg-white  py-3 px- border-t-2 shadow-sm fixed w-full top-0 z-10 md:z-40 dark:bg-darkcolorCard">
+    <div className=" bg-white  py-3  shadow-sm fixed w-full top-0 z-10 md:z-40 dark:bg-darkcolorCard">
    <div className="px-3 lg:px-0 flex justify-between items-center max-w-4xl mx-auto">
 
    <div className="flex gap-6 items-center">
@@ -45,11 +46,11 @@ document.querySelector('body').classList.toggle('dark-mode');
   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
 </svg>
 </span>
- <span className="p-2 mx-2 text-xl rounded-full cursor-pointer  hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white" onClick={toggleDarkMode}>
+ <span className="p-2 mx-2 text-xl rounded-full cursor-pointer  hover:bg-gray-200 dark:hover:bg-darkcolorInput dark:text-white" onClick={toggleDarkMode}>
  {darkmode?<LuSun/>:<LuMoon/>}
  </span>
-    <Link href={'/profile/posts'}>
-   {user && <Avatar url={user.avatar} size={'md'}/>}
+    <Link href={'/profile/'+user.id+'/posts'}>
+   {user && <Avatar url={user.avatar} />}
     </Link>
   </div>
    </div>

@@ -1,9 +1,10 @@
 import Layout from "@/Components/Layout";
-import Navigation from "@/Components/Navigation";
+
 import Post from "@/Components/Post";
 import PostForm from "@/Components/PostForm";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Login from "./login";
+
 import { useEffect, useState } from "react";
 
 

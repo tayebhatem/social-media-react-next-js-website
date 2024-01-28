@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import Card from './Card'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 
 export default function Navigation({showNavigation}) {
+  const session=useSession();
   const router=useRouter();
   const {pathname}=router;
   const activeElement="flex gap-2 p-3 bg-primary rounded-md text-white shadow-md hover:shadow-md hover:rounded-md hover:scale-110 transition-all";

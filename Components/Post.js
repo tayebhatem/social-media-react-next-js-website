@@ -6,16 +6,19 @@ import ReactTimeAgo from "react-time-ago";
 import { UserContext } from "@/Context/UserContext";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Comment from "./Comment";
+import { useRouter } from "next/router";
 
 export default function Post({post,loadPosts}) {
  
     const[dropDawnOpen,setDropDawnOpen]=useState(false);
     const [emptyComment,setEmptyComment]=useState(true);
     const {user}=useContext(UserContext);
-    const session=useSession()
+    const [avatar,setAvatar]=useState("");
     const[comments,setComments]=useState([]);
     const[likes,setLikes]=useState([]);
-  
+    const session=useSession()
+    const router=useRouter();
+    const { id } = router.query;
     const supabase=useSupabaseClient();
     const comment=useRef('');
    
@@ -59,7 +62,7 @@ export default function Post({post,loadPosts}) {
       from('post').delete().eq('postId',post.postId).then(
         result=>{
           if (!result.error) {
-            loadPosts()
+            loadPosts();
          
           }else{
             console.log(result.error);
@@ -75,7 +78,7 @@ export default function Post({post,loadPosts}) {
     
       
         await supabase.
-         from('comment').insert({context:commentContext,userId:user.id,postId:post.postId}).then(
+         from('comment').insert({context:commentContext,userId:session.user.id,postId:post.postId}).then(
            result=>{
              if (!result.error) {
               fetchComments();
@@ -126,13 +129,27 @@ export default function Post({post,loadPosts}) {
      }
 
     }
+    const getAvatar=async()=>{
+      await supabase.from('profiles').select('*').eq('id',session.user.id).single().then(
+        result=>{
+          setAvatar(result.data.avatar);
+        
+        }
+       );
+    }
     useEffect(()=>{
       fetchLikes();
-     
       fetchComments();
+     
+     
+      if(session.user.id!==id){
+
+        getAvatar();
+      }else{
+        setAvatar(user.avatar);
+      }
       
-      
-    },[])
+    },[user])
    
     const inputHandler=(e)=>{
       const text=e.target.value;
@@ -148,7 +165,7 @@ export default function Post({post,loadPosts}) {
         <div className="flex items-start justify-between">
 
            <div className="flex gap-2">
-           <Link href={'/profile/posts'}>
+           <Link href={'/profile/'+post.userId+'/posts'}>
            <Avatar url={post.profiles.avatar}/>
            </Link>
            
@@ -156,7 +173,7 @@ export default function Post({post,loadPosts}) {
           
           <div>
           <p>
-          <Link href={'/profile'}>
+          <Link href={'/profile/'+post.userId+'/posts'}>
           <span className="font-semibold mr-1">{post.profiles.name}</span>
           </Link>
           
@@ -214,11 +231,11 @@ export default function Post({post,loadPosts}) {
 
         <div>
             <p className="py-3">{post.context}</p>
-          <div className="flex gap-3">
+          <div className={post.photos.length>1?"grid grid-cols-2 gap-3 py-3":"flex gap-3 py-3"}>
           {
-            post.photos.map(url=>(
+            post.photos.map((url,index)=>(
               <>
-              <div className="flex items-center rounded-md  overflow-hidden">
+              <div key={index} className={post.photos.length>1?"relative flex items-center justify-center rounded-md h-48 overflow-hidden":"relative flex items-center justify-center rounded-md h-full overflow-hidden"}>
            <img src={url}/>
            </div>
               </>
@@ -259,7 +276,7 @@ export default function Post({post,loadPosts}) {
         }
         </div>
         <div className="flex gap-2 mt-4 items-center">
-        <Avatar url={user && user.avatar} size={'sm'}/>
+        {<Avatar url={avatar} size={'sm'}/>}
          <div className="grow p-3 flex gap-2 bg-gray-100 rounded-full dark:bg-darkcolorInput">
          <input className="grow resize-none  outline-none bg-transparent" ref={comment}  placeholder="Leave a comment..." onChange={inputHandler} />
          <button className="text-gray-500" >
