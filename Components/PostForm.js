@@ -4,7 +4,7 @@ import Card from "./Card";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { UserContext } from "@/Context/UserContext";
 import { v4 as uuidv4 } from 'uuid';
-
+import Image from "next/image";
 export default function PostForm({loadPosts}) {
   const supabase=useSupabaseClient();
   const session=useSession();
@@ -104,7 +104,7 @@ export default function PostForm({loadPosts}) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
               </svg>
               </div>
-              <img key={index} src={url}/>
+              <Image alt="photo" width={1000} height={1000} key={index} src={url}/>
               </div>
               </>
              ))

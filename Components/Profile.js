@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { CiCamera } from "react-icons/ci";
 import { v4 as uuidv4 } from 'uuid';
+import Image from "next/image";
 export default function Profile({children}) {
  
   const router=useRouter();
@@ -150,9 +151,10 @@ const fetchUser=async()=>{
    }
 
 useEffect(()=>{
+ 
   fetchUser();
   
-},[user])
+})
   return (
     
     <Layout>
@@ -174,7 +176,7 @@ useEffect(()=>{
        }
 
        {user.cover?<div className="h-48 overflow-hidden flex justify-center items-center ">
-                <img  src={user.cover}/>
+                <Image alt="photo" width={1000} height={1000}  src={user.cover}/>
             </div>:
             <div className="absolute top-2/4 left-2/4 -translate-x-1/2 -translate-y-2/4 text-6xl">
        <CiCamera/>

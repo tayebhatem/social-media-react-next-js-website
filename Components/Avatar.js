@@ -1,4 +1,4 @@
-
+import Image from "next/image";
 export default function Avatar({size,url}) {
   let styles="flex items-center overflow-hidden cursor-pointer rounded-full w-12 h-12 bg-gray-200   dark:bg-darkcolorInput";
   if(size==='lg'){
@@ -11,7 +11,7 @@ export default function Avatar({size,url}) {
   return (
     
     <div className={styles}>
-        <img className="grow"  src={url}/>
+        <Image alt="photo" width={300} height={300} className="grow"  src={url}/>
         </div>
   )
 }

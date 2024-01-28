@@ -4,7 +4,7 @@ import Post from "@/Components/Post";
 import PostForm from "@/Components/PostForm";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Login from "./login";
-
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 
@@ -28,8 +28,24 @@ export default function Home() {
  
      }
   useEffect(()=>{
+    
+    const fetchPosts=async()=>{
+      
+      try {
+       await supabase.from('post').select('*,profiles!inner(*)').order("created_at",{ ascending: false }).then(
+         result=>{
+          
+           setPosts(result.data);
+         }
+       );
+      } catch (error) {
+       console.log(error.message);
+       
+      }
+   
+       }
     fetchPosts();
-  },[])
+  })
    
   
 

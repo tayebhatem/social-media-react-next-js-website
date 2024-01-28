@@ -1,13 +1,13 @@
 import Link from "next/link";
 import Avatar from "./Avatar";
 import Card from "./Card";
-import React, { useState,useContext, useRef,useEffect } from 'react';
+import React, { useState,useContext, useRef,useEffect, useCallback } from 'react';
 import ReactTimeAgo from "react-time-ago";
 import { UserContext } from "@/Context/UserContext";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Comment from "./Comment";
 import { useRouter } from "next/router";
-
+import Image from "next/image";
 export default function Post({post,loadPosts}) {
  
     const[dropDawnOpen,setDropDawnOpen]=useState(false);
@@ -129,6 +129,7 @@ export default function Post({post,loadPosts}) {
      }
 
     }
+    
     const getAvatar=async()=>{
       await supabase.from('profiles').select('*').eq('id',session.user.id).single().then(
         result=>{
@@ -138,9 +139,52 @@ export default function Post({post,loadPosts}) {
        );
     }
     useEffect(()=>{
+      const fetchLikes=async()=>{
+        try {
+         await supabase.from('likes').select('*').eq('postId',post.postId).then(
+           result=>{
+           
+           
+            setLikes(result.data);
+            
+         
+           }
+         );
+        } catch (error) {
+         console.log(error.message);
+         
+        }
+      
+      
+         }
+
+         
+         const fetchComments=async()=>{
+          try {
+           await supabase.from('comment').select('*,profiles!inner(*)').eq('postId',post.postId).order("created_at").then(
+             result=>{
+    
+              
+               setComments(result.data);
+             }
+           );
+          } catch (error) {
+           console.log(error.message);
+           
+          }
+       
+           }
+          
       fetchLikes();
       fetchComments();
-     
+      const getAvatar=async()=>{
+      await supabase.from('profiles').select('*').eq('id',session.user.id).single().then(
+        result=>{
+          setAvatar(result.data.avatar);
+        
+        }
+       );
+    }
      
       if(session.user.id!==id){
 
@@ -149,7 +193,7 @@ export default function Post({post,loadPosts}) {
         setAvatar(user.avatar);
       }
       
-    },[user])
+    },[session.user.id, id, supabase, post.postId, user.avatar])
    
     const inputHandler=(e)=>{
       const text=e.target.value;
@@ -236,7 +280,7 @@ export default function Post({post,loadPosts}) {
             post.photos.map((url,index)=>(
               <>
               <div key={index} className={post.photos.length>1?"relative flex items-center justify-center rounded-md h-48 overflow-hidden":"relative flex items-center justify-center rounded-md h-full overflow-hidden"}>
-           <img src={url}/>
+           <Image alt="photo" width={1000} height={1000} className="grow" src={url}/>
            </div>
               </>
             ))

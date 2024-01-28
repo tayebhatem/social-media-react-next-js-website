@@ -39,9 +39,10 @@ export default function Posts() {
  
      }
   useEffect(()=>{
+   
     fetchPosts();
     
-  },[user,myPosts])
+  })
   
 
   return (
