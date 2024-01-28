@@ -163,7 +163,7 @@ useEffect(()=>{
         <div className=" pb-10 h-80">
        <div className="relative bg-gray-200 h-48 dark:bg-darkcolorNav">
        {
-        session.user.id===id && <label className="cursor-pointer">
+       session && session.user.id===id && <label className="cursor-pointer">
        <div className="absolute right-3 top-2 flex items-center gap-2 px-2 bg-white p-1 rounded-md shadow-lg cursor-pointer dark:bg-darkcolorCard">
        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
@@ -175,8 +175,8 @@ useEffect(()=>{
        </label>
        }
 
-       {user.cover?<div className="h-48 overflow-hidden flex justify-center items-center ">
-                <Image alt="photo" width={1000} height={1000}  src={user.cover}/>
+       {user && user.cover?<div className="h-48 overflow-hidden flex justify-center items-center ">
+                <Image alt="photo" width={1000} height={1000}  src={user && user.cover}/>
             </div>:
             <div className="absolute top-2/4 left-2/4 -translate-x-1/2 -translate-y-2/4 text-6xl">
        <CiCamera/>
@@ -186,7 +186,7 @@ useEffect(()=>{
               <label className="cursor-pointer">
               {user && <div className={isLoading && "animate-pulse"}><Avatar size={'lg'} url={user.avatar}/></div>}
              {
-              session.user.id===id && <>
+              session && session.user.id===id && <>
               <input type="file" className="hidden" multiple onChange={uplaodPhoto}/>
               <div className="absolute bottom-0 right-1 bg-white rounded-full p-1 shadow-md dark:bg-darkcolorInput">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">

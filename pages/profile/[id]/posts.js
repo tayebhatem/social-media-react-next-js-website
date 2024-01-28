@@ -48,7 +48,7 @@ export default function Posts() {
   return (
     <Profile >
        
-           {session.user.id===id && <PostForm loadPosts={fetchPosts}/>}
+           {session && session.user.id===id && <PostForm loadPosts={fetchPosts}/>}
           {
             myPosts.map(post=>(
               <>
