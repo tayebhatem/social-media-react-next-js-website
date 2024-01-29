@@ -4,7 +4,7 @@ import Layout from "@/Components/Layout";
 import { UserContext } from "@/Context/UserContext";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { CiCamera } from "react-icons/ci";
 import { v4 as uuidv4 } from 'uuid';
@@ -14,7 +14,8 @@ export default function Profile({children}) {
   const router=useRouter();
   const { id } = router.query;
   const {pathname}=router;
-  
+  const name=useRef('');
+  const boi=useRef('');
   const activeElement="flex gap-2 border-b-4 pb-3 border-primary text-primary";
   const nonActiveElement="flex gap-2 dark:text-darkcolorText";
  const isPosts=pathname.includes('/profile/[id]/posts');
@@ -24,7 +25,8 @@ export default function Profile({children}) {
 
  const supabase=useSupabaseClient();
  const [user,setUser]=useState({});
- const [url,setUrl]=useState(null);
+ const [editName,setEditName]=useState(false);
+ const [editBoi,setEditBoi]=useState(false);
  const [isLoading,setIsLoading]=useState(false);
  const session=useSession();
 
@@ -109,6 +111,51 @@ const updateProfilePicture=async(url)=>{
    }
 }
 
+const updateName=async()=>{
+  const userName=name.current.textContent;
+  
+  try{
+    await supabase.
+     from('profiles').update({name:userName}).eq('id',id).then(
+       result=>{
+         if (!result.error) {
+          
+          fetchUser();
+          setEditName(false);
+         }else{
+           console.log(result.error);
+         }
+       }
+     );
+    } catch (error) {
+     
+    }
+ 
+  
+}
+
+const updateBoi=async()=>{
+  const userBoi=boi.current.textContent;
+  
+  try{
+    await supabase.
+     from('profiles').update({boi:userBoi}).eq('id',id).then(
+       result=>{
+         if (!result.error) {
+          console.log(result);
+          fetchUser();
+          setEditBoi(false);
+         }else{
+           console.log(result.error);
+         }
+       }
+     );
+    } catch (error) {
+     
+    }
+ 
+  
+}
 const updateCover=async(url)=>{
   try{
     await supabase.
@@ -160,7 +207,7 @@ useEffect(()=>{
     <Layout>
     
         <Card noPadding={true}>
-        <div className=" pb-10 h-80">
+        <div className=" ">
        <div className="relative bg-gray-200 h-48 dark:bg-darkcolorNav">
        {
        session && session.user.id===id && <label className="cursor-pointer">
@@ -175,16 +222,16 @@ useEffect(()=>{
        </label>
        }
 
-       {user && user.cover?<div className="h-48 overflow-hidden flex justify-center items-center ">
-                <Image alt="photo" width={1000} height={1000}  src={user && user.cover}/>
+       {user!==null && user.cover?<div className="h-48 overflow-hidden flex justify-center items-center ">
+                <Image alt="photo" width={1000} height={1000}  src={user!==null && user.cover}/>
             </div>:
             <div className="absolute top-2/4 left-2/4 -translate-x-1/2 -translate-y-2/4 text-6xl">
        <CiCamera/>
        </div>}
-            <div className="absolute left-1/2 -bottom-1/3 flex flex-col justify-center items-center -translate-x-1/2 ">
+            <div className="absolute left-1/2 top-2/3 flex flex-col justify-center items-center -translate-x-1/2 ">
                <div className="relative border-2 border-white w-fit rounded-full bg-white  dark:bg-darkcolorInput  dark:border-darkcolorInput">
               <label className="cursor-pointer">
-              {user && <div className={isLoading && "animate-pulse"}><Avatar size={'lg'} url={user.avatar}/></div>}
+              {user!==null && <div className={isLoading && "animate-pulse"}><Avatar size={'lg'} url={user!==null && user.avatar}/></div>}
              {
               session && session.user.id===id && <>
               <input type="file" className="hidden" multiple onChange={uplaodPhoto}/>
@@ -196,18 +243,33 @@ useEffect(()=>{
                </div>
               </>
              }
+
               </label>
-              
+             
                
 
                </div>
-            <div className="font-bold text-xl">
+
+          {session && session.user.id===id?   <div className="font-bold text-xl px-2" contentEditable={editName} onDoubleClick={()=>{setEditName(true)}} onBlur={updateName} ref={name} >
                 {user && user.name}
-            </div>
+                
+            </div>:<div className="font-bold text-xl px-2">
+                {user && user.name}
+                
+            </div>}
+            
+            {session && session.user.id===id?   <p className="text-center" contentEditable={editBoi} onDoubleClick={()=>{setEditBoi(true)}} onBlur={updateBoi} ref={boi} >
+                {user && user.boi}
+                
+            </p>:<p className="text-center">
+                {user && user.boi}
+                
+            </p>}
+           
             
         </div>
        </div>
-       <div className="flex gap-4 mt-20 py-2 border-t text-gray-500 justify-center dark:border-t-darkcolorInput">
+       <div className="flex gap-4 mt-32 pt-2 border-t text-gray-500 justify-center dark:border-t-darkcolorInput">
        
        <Link href={'/profile/'+id+'/posts'}>
        <button className={isPosts? activeElement:nonActiveElement}>

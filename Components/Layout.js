@@ -7,7 +7,7 @@ import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 export default function Layout({children}) {
   const[showNavigation,setShowNavigation]=useState(false);
   const supabase=useSupabaseClient();
-  const [user,setUser]=useState({});
+  const [user,setUser]=useState(null);
   const session=useSession();
     
  useEffect(()=>{

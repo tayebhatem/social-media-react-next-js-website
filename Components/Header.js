@@ -46,12 +46,14 @@ document.querySelector('body').classList.toggle('dark-mode');
   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
 </svg>
 </span>
- <span className="p-2 mx-2 text-xl rounded-full cursor-pointer  hover:bg-gray-200 dark:hover:bg-darkcolorInput dark:text-white" onClick={toggleDarkMode}>
+ <span className="p-2 mx-2 text-xl rounded-full cursor-pointer  bg-gray-100 hover:bg-gray-200 dark:bg-darkcolorInput dark:hover:bg-darkcolorNav dark:text-white" onClick={toggleDarkMode}>
  {darkmode?<LuSun/>:<LuMoon/>}
  </span>
-    <Link href={'/profile/'+user.id+'/posts'}>
+    {user &&
+      <Link href={'/profile/'+user.id+'/posts'}>
    {user && <Avatar url={user.avatar} />}
     </Link>
+    }
   </div>
    </div>
     </div>

@@ -83,7 +83,7 @@ export default function PostForm({loadPosts}) {
   return (
     <Card> 
         <div className="flex gap-3">
-         <Avatar url={user && user.avatar}/>
+         <Avatar url={user!==null && user.avatar}/>
        
             <input className="grow resize-none outline-none outline-1 p-3 bg-gray-50 rounded-full dark:bg-darkcolorInput" placeholder="What's on your mind?" ref={context}/>
             

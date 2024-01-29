@@ -39,7 +39,6 @@ export default function Posts() {
  
      }
   useEffect(()=>{
-   
     fetchPosts();
     
   })
@@ -50,7 +49,7 @@ export default function Posts() {
        
            {session && session.user.id===id && <PostForm loadPosts={fetchPosts}/>}
           {
-            myPosts.map(post=>(
+           myPosts && myPosts.map(post=>(
               <>
               <Post key={post.postId} post={post}/>
               </>

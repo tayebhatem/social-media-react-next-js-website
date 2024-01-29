@@ -4,7 +4,6 @@ import Post from "@/Components/Post";
 import PostForm from "@/Components/PostForm";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Login from "./login";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 

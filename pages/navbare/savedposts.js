@@ -22,14 +22,7 @@ export default function SavePosts() {
   return (
     <Layout>
         <h2 className="font-bold text-3xl mb-3">Saved posts</h2>
-        {
-            posts.map(post=>(
-       <>
-       <Post url={post.profileImg} name={post.fullName} context={post.context} imgurl={post.image}/>
-  
-       </>
-      ))
-          }
+      
     </Layout>
   )
 }
