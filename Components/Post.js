@@ -83,7 +83,7 @@ export default function Post({post,loadPosts}) {
              if (!result.error) {
               fetchComments();
               comment.current.value = '';
-             
+              setEmptyComment(true);
              }else{
                console.log(result.error);
              }
@@ -93,7 +93,7 @@ export default function Post({post,loadPosts}) {
       
     }
 
-    const isLiked=!!likes.find(like=>like.userId===user.id);
+    const isLiked=user && !!likes.find(like=>like.userId===user.id);
  
     const addLike= ()=>{
     
@@ -156,7 +156,7 @@ export default function Post({post,loadPosts}) {
 
         getAvatar();
       }else{
-        setAvatar(user.avatar);
+      user &&  setAvatar(user.avatar);
       }
      }
       

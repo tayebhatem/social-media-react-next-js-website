@@ -3,13 +3,13 @@ import Profile from "@/Components/Profile";
 import Post from "@/Components/Post";
 import { useContext, useEffect,useState } from "react";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { UserContext } from "@/Context/UserContext";
+
 import { useRouter } from "next/router";
 export default function Posts() {
   const [myPosts,setMyPosts]=useState([]);
   const supabase=useSupabaseClient();
  const session=useSession();
-  const { user } = useContext(UserContext); 
+  
   const router=useRouter();
   const { id } = router.query;
   

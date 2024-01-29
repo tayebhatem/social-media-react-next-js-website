@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { CiCamera } from "react-icons/ci";
+import { FaCircle } from "react-icons/fa";
 import { v4 as uuidv4 } from 'uuid';
 import Image from "next/image";
 export default function Profile({children}) {
@@ -14,8 +15,7 @@ export default function Profile({children}) {
   const router=useRouter();
   const { id } = router.query;
   const {pathname}=router;
-  const name=useRef('');
-  const boi=useRef('');
+ 
   const activeElement="flex gap-2 border-b-4 pb-3 border-primary text-primary";
   const nonActiveElement="flex gap-2 dark:text-darkcolorText";
  const isPosts=pathname.includes('/profile/[id]/posts');
@@ -25,8 +25,7 @@ export default function Profile({children}) {
 
  const supabase=useSupabaseClient();
  const [user,setUser]=useState({});
- const [editName,setEditName]=useState(false);
- const [editBoi,setEditBoi]=useState(false);
+ 
  const [isLoading,setIsLoading]=useState(false);
  const session=useSession();
 
@@ -111,51 +110,7 @@ const updateProfilePicture=async(url)=>{
    }
 }
 
-const updateName=async()=>{
-  const userName=name.current.textContent;
-  
-  try{
-    await supabase.
-     from('profiles').update({name:userName}).eq('id',id).then(
-       result=>{
-         if (!result.error) {
-          
-          fetchUser();
-          setEditName(false);
-         }else{
-           console.log(result.error);
-         }
-       }
-     );
-    } catch (error) {
-     
-    }
- 
-  
-}
 
-const updateBoi=async()=>{
-  const userBoi=boi.current.textContent;
-  
-  try{
-    await supabase.
-     from('profiles').update({boi:userBoi}).eq('id',id).then(
-       result=>{
-         if (!result.error) {
-          console.log(result);
-          fetchUser();
-          setEditBoi(false);
-         }else{
-           console.log(result.error);
-         }
-       }
-     );
-    } catch (error) {
-     
-    }
- 
-  
-}
 const updateCover=async(url)=>{
   try{
     await supabase.
@@ -203,7 +158,7 @@ useEffect(()=>{
   
 })
   return (
-    
+    <UserContext.Provider value={{user}}>
     <Layout>
     
         <Card noPadding={true}>
@@ -250,26 +205,39 @@ useEffect(()=>{
 
                </div>
 
-          {session && session.user.id===id?   <div className="font-bold text-xl px-2" contentEditable={editName} onDoubleClick={()=>{setEditName(true)}} onBlur={updateName} ref={name} >
+          
+                
+            <div className="font-bold text-xl px-2">
                 {user && user.name}
                 
-            </div>:<div className="font-bold text-xl px-2">
-                {user && user.name}
+            </div>
+            <p className="text-center">
+                {user && user.boi}
                 
-            </div>}
+            </p>
             
-            {session && session.user.id===id?   <p className="text-center" contentEditable={editBoi} onDoubleClick={()=>{setEditBoi(true)}} onBlur={updateBoi} ref={boi} >
-                {user && user.boi}
-                
-            </p>:<p className="text-center">
-                {user && user.boi}
-                
-            </p>}
+            {
+              user && user.online? <div className="flex items-center gap-2 text-center text-gray-500">
+            online
+            <div className="animate-pulse">
+            <FaCircle className="text-green-500 w-3"/>
+            </div>
+            </div>:
+            <div className="flex items-center gap-2 text-center text-gray-500">
+            offline
+           
+            <FaCircle className="text-gray-400 w-3"/>
+           
+            </div>
+            }
+           
            
             
         </div>
+        
        </div>
-       <div className="flex gap-4 mt-32 pt-2 border-t text-gray-500 justify-center dark:border-t-darkcolorInput">
+        
+       <div className="flex gap-4 mt-36 pt-2 border-t text-gray-500 justify-center dark:border-t-darkcolorInput">
        
        <Link href={'/profile/'+id+'/posts'}>
        <button className={isPosts? activeElement:nonActiveElement}>
@@ -299,21 +267,24 @@ Photos
        </button>
       </Link>
 
-      <Link href={'/profile/'+id+'/about'}>
+     {
+      session && session.user.id===id &&  <Link href={'/profile/'+id+'/about'}>
       <button className={isAbout? activeElement:nonActiveElement}>
-       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
 </svg>
-About
+
+Edit profile
        </button>
       </Link>
+     }
        </div>
         </div>
         </Card>
-        <UserContext.Provider value={{user}}>
+        
         {children}
-        </UserContext.Provider>
+       
     </Layout>
-    
+    </UserContext.Provider>
   )
 }

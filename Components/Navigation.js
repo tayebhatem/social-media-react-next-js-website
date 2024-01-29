@@ -6,14 +6,29 @@ import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 export default function Navigation({showNavigation}) {
   const session=useSession();
   const router=useRouter();
+  
   const {pathname}=router;
   const activeElement="flex gap-2 p-3 bg-primary rounded-md text-white shadow-md hover:shadow-md hover:rounded-md hover:scale-110 transition-all";
-  const nonActiveElement="flex gap-2 p-3 hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all";
+  const nonActiveElement="flex gap-2 p-3 hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all cursor-pointer";
   const supabase=useSupabaseClient()
   const logOut=async()=>{
-   await supabase.auth.signOut();
+
+    try{
+      await supabase.
+       from('profiles').update({online:false}).eq('id',session.user.id).then(
+         result=>{
+           if (!result.error) {
+           supabase.auth.signOut();
+           }else{
+             console.log(result.error);
+           }
+         }
+       );
+      } catch (error) {
+       console.log(error.message);
+      }
   }
-  
+
   return (
  
      <div className={showNavigation? "fixed top-0 z-30 w-3/5 md:w-1/3 md:static left-0 transition-all":"fixed top-0 z-30 w-3/5 md:w-1/3 md:static -left-3/4 transition-all"}>
@@ -28,7 +43,14 @@ export default function Navigation({showNavigation}) {
      Home
      </div>
     </Link>
-
+    <Link href={session ?'/profile/'+session.user.id+'/posts':''}>
+    <div  className={session && pathname==='/profile/'+session.user.id+'/posts'?activeElement:nonActiveElement} >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            </svg>
+     Profile
+     </div>
+    </Link>
      <Link href={'/navbare/messages'}>
      <div href="" className={pathname==='/profile/friends'?activeElement:nonActiveElement}>
      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -54,12 +76,12 @@ export default function Navigation({showNavigation}) {
      </div>
    </Link>
    
-   <button className={nonActiveElement} onClick={logOut}>
+   <div className={nonActiveElement} onClick={logOut}>
      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
      </svg>
      Logout
-     </button>
+     </div>
    
     </div>
     

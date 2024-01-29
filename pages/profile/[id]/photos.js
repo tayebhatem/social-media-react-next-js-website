@@ -1,25 +1,65 @@
 import Card from "@/Components/Card";
 import Profile from "@/Components/Profile";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState,useEffect } from "react";
 export default function Photos() {
+  const router=useRouter();
+  const { id } = router.query;
+  const [images,setImages]=useState(null);
+  const supabase=useSupabaseClient();
+  
+  useEffect(()=>{
+    const fetchImages=async()=>{
+      try {
+  
+      await supabase.from('post').select('photos').eq('userId',id).order("created_at",{ ascending: false }).then(
+        result=>{
+          
+           
+         result.data && setImages(result.data);
+  
+        }
+      );
+     
+      } catch (error) {
+       console.log(error.message);
+       
+      }
+   
+       }
+    fetchImages();
+    
+  },[])
+  
   return (
+
     <Profile>
       <div>
         <Card>
         <h2 className="font-bold text-2xl mb-2">Photos</h2>
+        {
+          images===null && <div className="font-bold text-2xl text-gray-300 text-center my-6">
+          No photo uploaded yet
+          </div>
+        }
+             
         <div className="grid grid-cols-2 gap-2 ">
-         <div className="flex items-center rounded-md  h-52 overflow-hidden">
-         <Image alt="photo" width={1000} height={1000} src="https://img.freepik.com/photos-gratuite/belle-photo-cloture-menant-maison-dans-zone-herbe-verte_181624-18255.jpg?w=740&t=st=1705926646~exp=1705927246~hmac=0ec99be8f3a7bc420d3e34c51574b07e52f39b19cab7672e8d6a56a2efdfe037"/>  
+
+        {
+          images && images.map(image=>(
+            image.photos.map((url,index)=>(
+              <>
+            <div className="flex items-center rounded-md  h-52 overflow-hidden"key={index}>
+         <Image alt="photo" width={1000} height={1000} src={url}/>  
          </div>
-         <div className="flex items-center rounded-md h-52  overflow-hidden">
-         <Image alt="photo" width={1000} height={1000}  src="https://img.freepik.com/photos-premium/prairie-montagne-seveuse-dans-foret-petite-cabane-entouree-arbres_691154-39.jpg?w=360"/>
-         </div>
-         <div className="flex items-center rounded-md h-52  overflow-hidden">
-         <Image alt="photo" width={1000} height={1000}  src="https://img.freepik.com/photos-premium/interieur-ancienne-chapelle-bavaroise_691154-14.jpg?w=740"/>
-         </div>
-         <div className="flex items-center rounded-md h-52  overflow-hidden">
-         <Image alt="photo" width={1000} height={1000}  src="https://img.freepik.com/photos-gratuite/photographe-se-tient-dans-salle-club-abandonnee-tbilissi-georgie_181624-36786.jpg?size=626&ext=jpg"/>
-         </div>
+            </>
+            ))
+          
+          ))
+        }
+        
         </div>
         </Card>
       </div>

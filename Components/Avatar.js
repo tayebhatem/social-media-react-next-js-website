@@ -11,7 +11,7 @@ export default function Avatar({size,url}) {
   return (
     
     <div className={styles}>
-        <Image alt="photo" width={300} height={300} className="grow"  src={url}/>
+        <Image alt="photo" src={url} width={300} height={300} className="grow"  />
         </div>
   )
 }
