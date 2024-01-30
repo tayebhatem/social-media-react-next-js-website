@@ -9,6 +9,7 @@ import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { CiCamera } from "react-icons/ci";
 import { FaCircle } from "react-icons/fa";
 import { v4 as uuidv4 } from 'uuid';
+import ReactTimeAgo from "react-time-ago";
 import Image from "next/image";
 export default function Profile({children}) {
  
@@ -224,7 +225,7 @@ useEffect(()=>{
             </div>
             </div>:
             <div className="flex items-center gap-2 text-center text-gray-500">
-            offline
+            online  <ReactTimeAgo date={user.oflinetime} locale="en-US"/>
            
             <FaCircle className="text-gray-400 w-3"/>
            

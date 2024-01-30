@@ -14,10 +14,10 @@ export default function Navigation({showNavigation}) {
   const supabase=useSupabaseClient();
   const [notification,setNotification]=useState([]);
   const updateOnline=async()=>{
-   
+    var currentDateTime = new Date();
     try{
       await supabase.
-       from('profiles').update({online:false}).eq('id',session.user.id).then(
+       from('profiles').update({online:false,oflinetime:currentDateTime}).eq('id',session.user.id).then(
         result=>{
           supabase.auth.signOut();
         }
