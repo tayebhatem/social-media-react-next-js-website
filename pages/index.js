@@ -5,10 +5,12 @@ import PostForm from "@/Components/PostForm";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Login from "./login";
 import { useEffect, useState } from "react";
+import { NotificationContext } from "@/Context/NotificationContext";
 
 
 export default function Home() {
   const [posts,setPosts]=useState([]);
+ 
   
   const session=useSession();
   const supabase=useSupabaseClient();
@@ -26,7 +28,20 @@ export default function Home() {
     }
  
      }
+     const fetchNotifications=()=>{
+      try {
+        supabase.from('notifications').select('*,post!inner(*)').eq('post.userId',session.user.id).eq('seen',false).then(
+          result=>{
+            setNotification(result.data)
+          }
+
+        )
+      } catch (error) {
+        
+      }
+    }
   useEffect(()=>{
+        
     
     const fetchPosts=async()=>{
       
@@ -44,7 +59,7 @@ export default function Home() {
    
        }
     fetchPosts();
-  })
+  },[])
    
   
   const updateOnline=async()=>{
@@ -56,6 +71,7 @@ export default function Home() {
       }
   }
   if (!session) {
+    
     return <Login/>
   }else{
     updateOnline();
@@ -75,7 +91,6 @@ export default function Home() {
     }
    
    </Layout>
- 
 
   );
 }

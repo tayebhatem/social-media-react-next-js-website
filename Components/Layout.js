@@ -36,7 +36,7 @@ export default function Layout({children}) {
     <UserContext.Provider value={{user}}>
     <div className="">
       <Header  setShowNavigation={setShowNavigation} showNavigation={showNavigation}/>
-    <div className="px-3 lg:px-0 mt-24 ">
+    <div className="relative px-3 lg:px-0 mt-24 ">
     
       <div className="flex-col flex md:flex-row  max-w-4xl mx-auto mt-6 gap-3 ">
    

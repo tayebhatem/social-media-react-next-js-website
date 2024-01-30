@@ -2,39 +2,61 @@ import Link from 'next/link'
 import Card from './Card'
 import { useRouter } from 'next/router'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useState,useEffect } from 'react';
+
 
 export default function Navigation({showNavigation}) {
   const session=useSession();
   const router=useRouter();
-  
   const {pathname}=router;
-  const activeElement="flex gap-2 p-3 bg-primary rounded-md text-white shadow-md hover:shadow-md hover:rounded-md hover:scale-110 transition-all";
-  const nonActiveElement="flex gap-2 p-3 hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all cursor-pointer";
-  const supabase=useSupabaseClient()
-  const logOut=async()=>{
-    updateOnline();
-    await supabase.auth.signOut();
-
+  const activeElement="relative flex gap-2 p-3 bg-primary rounded-md text-white shadow-md hover:shadow-md hover:rounded-md hover:scale-110 transition-all";
+  const nonActiveElement="relative flex gap-2 p-3 hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all cursor-pointer";
+  const supabase=useSupabaseClient();
+  const [notification,setNotification]=useState([]);
+  const updateOnline=async()=>{
+    try{
+      await supabase.
+       from('profiles').update({online:true}).eq('id',session.user.id).then(
+        result=>{
+          supabase.auth.signOut();
+        }
+       );
+      } catch (error) {
+       console.log(error.message);
+      }
+  }
+  const logOut=()=>{
+     updateOnline();
+    
+    
    
   }
-  const updateOnline=()=>{
-    try{
-      supabase.
-      from('profiles').update({online:false}).eq('id',session.user.id).then(
-        result=>{
-          if (!result.error) {
-        
-          }else{
-            console.log(result.error);
-          }
-        }
-      );
-     } catch (error) {
-      console.log(error.message);
-     }
+  const updateNotification=()=>{
+    supabase.from('notifications').update('seen',true).eq('idUser',session.user.id).then(
+      result=>{
+   if(!result.error){
+    fetchNotifications();
+   }
+      }
+    );
   }
-  return (
+  const fetchNotifications=()=>{
+    try {
+      supabase.from('notifications').select('*,post!inner(*)').eq('post.userId',session.user.id).eq('status','unseen').then(
+        result=>{
+          setNotification(result.data)
+        }
+      )
+    } catch (error) {
+      
+    }
+  }
+  useEffect(()=>{
+    
+    fetchNotifications();
  
+  },[])
+  return (
      <div className={showNavigation? "fixed top-0 z-30 w-3/5 md:w-1/3 md:static left-0 transition-all":"fixed top-0 z-30 w-3/5 md:w-1/3 md:static -left-3/4 transition-all"}>
        <Card fullHight={true}>
     <div className='px-4 pt-2'>
@@ -72,11 +94,14 @@ export default function Navigation({showNavigation}) {
      </div>
     </Link>
    <Link href={'/navbare/notifications'}>
-   <div  className={pathname==='/notifications'?activeElement:nonActiveElement}>
+   <div  className={pathname==='/notifications'?activeElement:nonActiveElement} >
      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
      <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
      </svg>
      Notifications
+    {
+    notification && notification.length>0 &&  <span className='absolute flex items-center justify-center left-2 top-2 bg-red-600 text-white rounded-full p-2 w-5 h-5' >{ notification.length}</span>
+    }
      </div>
    </Link>
    

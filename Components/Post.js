@@ -8,6 +8,7 @@ import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import Comment from "./Comment";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import { NotificationContext } from "@/Context/NotificationContext";
 export default function Post({post,loadPosts}) {
  
     const[dropDawnOpen,setDropDawnOpen]=useState(false);
@@ -21,7 +22,7 @@ export default function Post({post,loadPosts}) {
     const { id } = router.query;
     const supabase=useSupabaseClient();
     const comment=useRef('');
-   
+    const{fetchNotifications}=useContext(NotificationContext);
     const fetchComments=async()=>{
       try {
        await supabase.from('comment').select('*,profiles!inner(*)').eq('postId',post.postId).order("created_at").then(
@@ -73,6 +74,26 @@ export default function Post({post,loadPosts}) {
       
      }
     }
+
+    const addNotification=async(action)=>{
+      
+      
+        await supabase.
+        from('notifications').insert({userId:session.user.id,postId:post.postId,action:action}).then(
+          result=>{
+            if (!result.error) {
+            
+             
+            }else{
+              console.log(result.error);
+            }
+          }
+        );
+      
+        
+      
+    }
+
     const addComment=async()=>{
       const commentContext=comment.current.value;
     
@@ -81,7 +102,9 @@ export default function Post({post,loadPosts}) {
          from('comment').insert({context:commentContext,userId:session.user.id,postId:post.postId}).then(
            result=>{
              if (!result.error) {
+              addNotification('commented');
               fetchComments();
+              fetchNotifications();
               comment.current.value = '';
               setEmptyComment(true);
              }else{
@@ -104,8 +127,9 @@ export default function Post({post,loadPosts}) {
        from('likes').insert({userId:user.id,postId:post.postId}).then(
          result=>{
            if (!result.error) {
+            addNotification('liked');
            fetchLikes();
-          
+           fetchNotifications();
            }else{
              console.log(result.error);
            }
@@ -281,7 +305,7 @@ export default function Post({post,loadPosts}) {
           comments.map(comment=>(
            <>
            
-           <Comment key={comment.commentId} comment={comment}/>
+           <Comment key={comment.commentId} comment={comment} loadComments={fetchComments}/>
            </>
           ))
         }
