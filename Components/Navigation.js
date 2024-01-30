@@ -14,9 +14,10 @@ export default function Navigation({showNavigation}) {
   const supabase=useSupabaseClient();
   const [notification,setNotification]=useState([]);
   const updateOnline=async()=>{
+   
     try{
       await supabase.
-       from('profiles').update({online:true}).eq('id',session.user.id).then(
+       from('profiles').update({online:false}).eq('id',session.user.id).then(
         result=>{
           supabase.auth.signOut();
         }
@@ -42,7 +43,7 @@ export default function Navigation({showNavigation}) {
   }
   const fetchNotifications=()=>{
     try {
-      supabase.from('notifications').select('*,post!inner(*)').eq('post.userId',session.user.id).eq('status','unseen').then(
+      supabase.from('notifications').select('*,post!inner(*)').eq('post.userId',session.user.id).neq('userId',session.user.id).eq('status','unseen').then(
         result=>{
           setNotification(result.data)
         }

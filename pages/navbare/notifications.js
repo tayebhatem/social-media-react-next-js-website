@@ -6,6 +6,7 @@ import ReactTimeAgo from "react-time-ago";
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useEffect,useState } from 'react';
 import Post from '@/Components/Post';
+import Link from 'next/link';
 
 export default function Notifications() {
   const supabase=useSupabaseClient();
@@ -48,7 +49,7 @@ export default function Notifications() {
   }  
   const fetchNotifications=()=>{
     try {
-      supabase.from('notifications').select('*,post!inner(*),profiles!inner(*)').eq('post.userId',session.user.id).then(
+      supabase.from('notifications').select('*,post!inner(*),profiles!inner(*)').eq('post.userId',session.user.id).neq('userId',session.user.id).then(
         result=>{
           console.log(result.data);
           setNotifications(result.data)
@@ -85,16 +86,18 @@ export default function Notifications() {
             {
                 notifications.map((notification)=>(
                  <>
-                 <div className={notification.status=='seen'?'flex items-center gap-2 p-3 rounded-md cursor-pointer':'flex items-center gap-2 p-3 rounded-md cursor-pointer  bg-gray-100'} onClick={()=>{showPost(notification.id,notification.post.postId)}}>
+                 <div className={notification.status=='seen'?'flex items-center gap-2 p-3 rounded-md cursor-pointer':'flex items-center gap-2 p-3 rounded-md cursor-pointer  bg-gray-100 dark:bg-darkcolorNav'} onClick={()=>{showPost(notification.id,notification.post.postId)}}>
                   
                   <Avatar url={notification.profiles.avatar}/>
+               
+                 
                   <div>
                   <div className='flex items-center gap-2'>
-                  <div className='text-lg font-bold'>
+                  <div className='text-lg font-bold truncate'>
                     {notification.profiles.name}
                   </div>
 
-                  <div>
+                  <div className=' truncate'>
                     {notification.action} in your post
                   </div>
                   </div>

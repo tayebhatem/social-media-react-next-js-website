@@ -28,18 +28,7 @@ export default function Home() {
     }
  
      }
-     const fetchNotifications=()=>{
-      try {
-        supabase.from('notifications').select('*,post!inner(*)').eq('post.userId',session.user.id).eq('seen',false).then(
-          result=>{
-            setNotification(result.data)
-          }
-
-        )
-      } catch (error) {
-        
-      }
-    }
+    
   useEffect(()=>{
         
     
