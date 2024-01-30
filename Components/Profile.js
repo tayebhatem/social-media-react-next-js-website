@@ -225,9 +225,7 @@ useEffect(()=>{
             </div>
             </div>:
             <div className="flex items-center gap-2 text-center text-gray-500">
-            online  <ReactTimeAgo date={user.oflinetime} locale="en-US"/>
-           
-            <FaCircle className="text-gray-400 w-3"/>
+            online   {user.offlinetime &&  <ReactTimeAgo date={user.offlinetime} locale="en-US"/>}
            
             </div>
             }

@@ -17,7 +17,7 @@ export default function Navigation({showNavigation}) {
     var currentDateTime = new Date();
     try{
       await supabase.
-       from('profiles').update({online:false,oflinetime:currentDateTime}).eq('id',session.user.id).then(
+       from('profiles').update({online:false,offlinetime:currentDateTime}).eq('id',session.user.id).then(
         result=>{
           supabase.auth.signOut();
         }
