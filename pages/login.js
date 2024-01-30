@@ -1,17 +1,24 @@
 
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook,FaTwitter } from "react-icons/fa";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 export default function Login() {
   const supabase=useSupabaseClient();
-
+  const session=useSession();
   const loginWithGoogle=async()=>{
    await supabase.auth.signInWithOAuth({
       provider: 'google',
-    })
+    }).then(
+      result=>{
+       if(result){
+
+       }
+      }
+    )
   
   }
+ 
   const signInWithFacebook=async()=> {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'facebook',

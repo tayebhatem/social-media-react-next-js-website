@@ -12,23 +12,27 @@ export default function Navigation({showNavigation}) {
   const nonActiveElement="flex gap-2 p-3 hover:bg-primary hover:text-white hover:shadow-md hover:rounded-md hover:scale-110 transition-all cursor-pointer";
   const supabase=useSupabaseClient()
   const logOut=async()=>{
+    updateOnline();
+    await supabase.auth.signOut();
 
-    try{
-      await supabase.
-       from('profiles').update({online:false}).eq('id',session.user.id).then(
-         result=>{
-           if (!result.error) {
-           supabase.auth.signOut();
-           }else{
-             console.log(result.error);
-           }
-         }
-       );
-      } catch (error) {
-       console.log(error.message);
-      }
+   
   }
-
+  const updateOnline=()=>{
+    try{
+      supabase.
+      from('profiles').update({online:false}).eq('id',session.user.id).then(
+        result=>{
+          if (!result.error) {
+        
+          }else{
+            console.log(result.error);
+          }
+        }
+      );
+     } catch (error) {
+      console.log(error.message);
+     }
+  }
   return (
  
      <div className={showNavigation? "fixed top-0 z-30 w-3/5 md:w-1/3 md:static left-0 transition-all":"fixed top-0 z-30 w-3/5 md:w-1/3 md:static -left-3/4 transition-all"}>

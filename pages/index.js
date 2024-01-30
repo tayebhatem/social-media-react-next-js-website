@@ -47,9 +47,18 @@ export default function Home() {
   })
    
   
-
+  const updateOnline=async()=>{
+    try{
+      await supabase.
+       from('profiles').update({online:true}).eq('id',session.user.id);
+      } catch (error) {
+       console.log(error.message);
+      }
+  }
   if (!session) {
     return <Login/>
+  }else{
+    updateOnline();
   }
   return (
 
